@@ -2,6 +2,7 @@ const express = require("express")
 const { ApolloServer } = require("@apollo/server")
 const { expressMiddleware } = require("@as-integrations/express5")
 const cors = require("cors")
+const { default: axios } = require("axios");
 
 async function startServer() {
     const app = express();
@@ -13,11 +14,31 @@ async function startServer() {
             completed: Boolean
         }
 
-         type Query {
-            getTodos: [Todo]           
+         type User {
+            id: ID!
+            name: String!
+            username: String!
+            email: String!
+            phone: String!
+            website: String!
+        }
+
+        type Query {
+            getTodos: [Todo]
+            getAllUsers: [User]
         }
         `,
-        resolvers: {}
+        resolvers: {
+            Query: {
+                getTodos: async () => (
+                    await axios.get("https://jsonplaceholder.typicode.com/todos")
+                ).data,
+                getAllUsers: async () => (
+                    await axios.get("https://jsonplaceholder.typicode.com/users")
+                ).data,
+
+            }
+        }
     })
 
     app.use(express.json());
